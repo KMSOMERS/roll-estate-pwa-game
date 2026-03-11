@@ -222,7 +222,7 @@ function diceMatchRouteRequirement(diceValues: DieValue[], routeIndex: number): 
 export function getClaimableRouteIds(
   dice: Die[],
   routesClaimed: Record<string, string>,
-  playerId: string
+  _playerId: string
 ): string[] {
   const values = getDiceValues(dice);
   return MASS_TRANSIT_ROUTE_IDS.filter((routeId, index) => {

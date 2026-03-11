@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run generate-pwa-assets && tsc && vite build",
-    "generate-pwa-assets": "pwa-assets-generator public/vite.svg -r .",
+    "generate-pwa-assets": "pwa-assets-generator",
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run"
