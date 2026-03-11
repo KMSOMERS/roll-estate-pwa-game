@@ -3,7 +3,12 @@
  */
 
 import type { GameAction, GameState } from "./types";
-import { cloneDice, createInitialDice, rollUnlockedDice, MAX_REROLLS } from "./dice";
+import {
+  cloneDice,
+  createInitialDice,
+  rollUnlockedDice,
+  MAX_REROLLS,
+} from "./dice";
 import {
   getDiceValues,
   getRentalValueForRoll,
@@ -27,7 +32,7 @@ function getCurrentPlayer(state: GameState) {
 function immutableUpdatePlayer(
   players: GameState["players"],
   playerIndex: number,
-  update: (p: GameState["players"][number]) => GameState["players"][number]
+  update: (p: GameState["players"][number]) => GameState["players"][number],
 ) {
   return players.map((p, i) => (i === playerIndex ? update(p) : p));
 }
@@ -48,7 +53,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "TOGGLE_DIE_LOCK": {
       if (state.phase !== "rolling") return state;
       const dice = cloneDice(state.dice).map((d) =>
-        d.id === action.dieId ? { ...d, locked: !d.locked } : d
+        d.id === action.dieId ? { ...d, locked: !d.locked } : d,
       );
       return { ...state, dice };
     }
@@ -69,28 +74,41 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         return state;
       }
       const value = getRentalValueForRoll(action.rowId, diceValues);
-      const slots = player.rentals[action.rowId] ?? Array(getRentalSlotCount(action.rowId)).fill(0);
+      const slots =
+        player.rentals[action.rowId] ??
+        Array(getRentalSlotCount(action.rowId)).fill(0);
       const newSlots = [...slots];
       newSlots[action.slotIndex] = value;
       const newRentals = { ...player.rentals, [action.rowId]: newSlots };
       const rentalsCount = player.rentalsCount + 1;
 
-      let players = immutableUpdatePlayer(state.players, state.currentPlayerIndex, (p) => ({
-        ...p,
-        rentals: newRentals,
-        rentalsCount,
-      }));
+      let players = immutableUpdatePlayer(
+        state.players,
+        state.currentPlayerIndex,
+        (p) => ({
+          ...p,
+          rentals: newRentals,
+          rentalsCount,
+        }),
+      );
 
       let businessesClaimed = { ...state.businessesClaimed };
       const updatedPlayer = players[state.currentPlayerIndex]!;
       if (hasCompletedRow(action.rowId, updatedPlayer)) {
         const nextBiz = getNextBusinessForRow(action.rowId, businessesClaimed);
         if (nextBiz) {
-          businessesClaimed = { ...businessesClaimed, [nextBiz.id]: updatedPlayer.playerId };
-          players = immutableUpdatePlayer(players, state.currentPlayerIndex, (p) => ({
-            ...p,
-            purchasedAssets: [...p.purchasedAssets, nextBiz.id],
-          }));
+          businessesClaimed = {
+            ...businessesClaimed,
+            [nextBiz.id]: updatedPlayer.playerId,
+          };
+          players = immutableUpdatePlayer(
+            players,
+            state.currentPlayerIndex,
+            (p) => ({
+              ...p,
+              purchasedAssets: [...p.purchasedAssets, nextBiz.id],
+            }),
+          );
         }
       }
 
@@ -107,13 +125,24 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case "CLAIM_ROUTE": {
       const player = getCurrentPlayer(state);
-      const claimable = getClaimableRouteIds(state.dice, state.routesClaimed, player.playerId);
+      const claimable = getClaimableRouteIds(
+        state.dice,
+        state.routesClaimed,
+        player.playerId,
+      );
       if (!claimable.includes(action.routeId)) return state;
-      const routesClaimed = { ...state.routesClaimed, [action.routeId]: player.playerId };
-      const players = immutableUpdatePlayer(state.players, state.currentPlayerIndex, (p) => ({
-        ...p,
-        massTransitCount: p.massTransitCount + 1,
-      }));
+      const routesClaimed = {
+        ...state.routesClaimed,
+        [action.routeId]: player.playerId,
+      };
+      const players = immutableUpdatePlayer(
+        state.players,
+        state.currentPlayerIndex,
+        (p) => ({
+          ...p,
+          massTransitCount: p.massTransitCount + 1,
+        }),
+      );
       const isEnded = checkEndgameTriggered(players, state.businessesClaimed);
       const finalScores = isEnded ? computeFinalScores(players) : undefined;
       return {
@@ -129,10 +158,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const player = getCurrentPlayer(state);
       if (player.liquidAssets > 0) return state;
       const sum = getDiceValues(state.dice).reduce((a, b) => a + b, 0);
-      const players = immutableUpdatePlayer(state.players, state.currentPlayerIndex, (p) => ({
-        ...p,
-        liquidAssets: sum,
-      }));
+      const players = immutableUpdatePlayer(
+        state.players,
+        state.currentPlayerIndex,
+        (p) => ({
+          ...p,
+          liquidAssets: sum,
+        }),
+      );
       const isEnded = checkEndgameTriggered(players, state.businessesClaimed);
       const finalScores = isEnded ? computeFinalScores(players) : undefined;
       return { ...state, players, isEnded, finalScores };
@@ -142,10 +175,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const player = getCurrentPlayer(state);
       if (player.indexesClaimed >= 2) return state;
       if (!hasRunOf5(getDiceValues(state.dice))) return state;
-      const players = immutableUpdatePlayer(state.players, state.currentPlayerIndex, (p) => ({
-        ...p,
-        indexesClaimed: p.indexesClaimed + 1,
-      }));
+      const players = immutableUpdatePlayer(
+        state.players,
+        state.currentPlayerIndex,
+        (p) => ({
+          ...p,
+          indexesClaimed: p.indexesClaimed + 1,
+        }),
+      );
       const isEnded = checkEndgameTriggered(players, state.businessesClaimed);
       const finalScores = isEnded ? computeFinalScores(players) : undefined;
       return { ...state, players, isEnded, finalScores };
@@ -155,10 +192,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const player = getCurrentPlayer(state);
       if (player.lottoClaimed) return state;
       if (!hasFiveMatching(getDiceValues(state.dice))) return state;
-      const players = immutableUpdatePlayer(state.players, state.currentPlayerIndex, (p) => ({
-        ...p,
-        lottoClaimed: true,
-      }));
+      const players = immutableUpdatePlayer(
+        state.players,
+        state.currentPlayerIndex,
+        (p) => ({
+          ...p,
+          lottoClaimed: true,
+        }),
+      );
       const isEnded = checkEndgameTriggered(players, state.businessesClaimed);
       const finalScores = isEnded ? computeFinalScores(players) : undefined;
       return { ...state, players, isEnded, finalScores };
@@ -167,10 +208,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "LOSE_INTEREST": {
       const player = getCurrentPlayer(state);
       if (player.lostInterestRows.includes(action.rowId)) return state;
-      const players = immutableUpdatePlayer(state.players, state.currentPlayerIndex, (p) => ({
-        ...p,
-        lostInterestRows: [...p.lostInterestRows, action.rowId],
-      }));
+      const players = immutableUpdatePlayer(
+        state.players,
+        state.currentPlayerIndex,
+        (p) => ({
+          ...p,
+          lostInterestRows: [...p.lostInterestRows, action.rowId],
+        }),
+      );
       const isEnded = checkEndgameTriggered(players, state.businessesClaimed);
       const finalScores = isEnded ? computeFinalScores(players) : undefined;
       return {

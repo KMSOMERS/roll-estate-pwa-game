@@ -1402,11 +1402,16 @@ button.score-sheet__index-cell.score-sheet__index-cell--selected {
   gap: 0.5rem 0.75rem;
   padding: 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--player-color, #64748b) 40%, transparent);
+  border: 1px solid
+    color-mix(in srgb, var(--player-color, #64748b) 40%, transparent);
   background: color-mix(in srgb, var(--player-color, #64748b) 12%, transparent);
 }
 .end-screen__score-row--winner {
-  border-color: color-mix(in srgb, var(--player-color, #22c55e) 60%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--player-color, #22c55e) 60%,
+    transparent
+  );
   background: color-mix(in srgb, var(--player-color, #22c55e) 18%, transparent);
 }
 .end-screen__score-rank {

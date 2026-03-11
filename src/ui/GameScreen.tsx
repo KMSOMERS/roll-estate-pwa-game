@@ -17,7 +17,8 @@ function optionMatches(a: SelectedOption | null, b: SelectedOption): boolean {
   if (a.type === "rental" && b.type === "rental")
     return a.rowId === b.rowId && a.slotIndex === b.slotIndex;
   if (a.type === "route" && b.type === "route") return a.routeId === b.routeId;
-  if (a.type === "lose_interest" && b.type === "lose_interest") return a.rowId === b.rowId;
+  if (a.type === "lose_interest" && b.type === "lose_interest")
+    return a.rowId === b.rowId;
   if (a.type === "liquid" && b.type === "liquid") return true;
   if (a.type === "index" && b.type === "index") return true;
   if (a.type === "lotto" && b.type === "lotto") return true;
@@ -28,12 +29,12 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   playerConfigs,
   onBackToSetup,
 }) => {
-  const [state, dispatch] = useReducer(
-    gameReducer,
-    undefined,
-    () => createInitialState(playerConfigs)
+  const [state, dispatch] = useReducer(gameReducer, undefined, () =>
+    createInitialState(playerConfigs),
   );
-  const [selectedOption, setSelectedOption] = useState<SelectedOption | null>(null);
+  const [selectedOption, setSelectedOption] = useState<SelectedOption | null>(
+    null,
+  );
 
   const handleRollDice = useCallback(() => {
     setSelectedOption(null);
@@ -44,7 +45,11 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     if (!selectedOption) return;
     switch (selectedOption.type) {
       case "rental":
-        dispatch({ type: "CLAIM_RENTAL", rowId: selectedOption.rowId, slotIndex: selectedOption.slotIndex });
+        dispatch({
+          type: "CLAIM_RENTAL",
+          rowId: selectedOption.rowId,
+          slotIndex: selectedOption.slotIndex,
+        });
         break;
       case "route":
         dispatch({ type: "CLAIM_ROUTE", routeId: selectedOption.routeId });

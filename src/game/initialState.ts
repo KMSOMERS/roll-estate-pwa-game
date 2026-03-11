@@ -19,7 +19,9 @@ function createInitialRentals(): GameState["players"][0]["rentals"] {
   return rentals;
 }
 
-function cloneRentals(rentals: GameState["players"][0]["rentals"]): GameState["players"][0]["rentals"] {
+function cloneRentals(
+  rentals: GameState["players"][0]["rentals"],
+): GameState["players"][0]["rentals"] {
   const out: Record<string, number[]> = {};
   for (const [rowId, arr] of Object.entries(rentals)) {
     out[rowId] = [...arr];

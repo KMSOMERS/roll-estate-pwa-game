@@ -138,184 +138,183 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
                   key={rowId}
                   className={`score-sheet__neighborhood ${currentPlayer.lostInterestRows.includes(rowId) ? "score-sheet__row--lost" : ""}`}
                 >
-                    {(() => {
-                      const lostInterest =
-                        currentPlayer.lostInterestRows.includes(rowId);
-                      const rowName = ROW_DISPLAY_NAMES[rowId] ?? rowId;
-                      const slotCount = getRentalSlotCount(rowId);
-                      const slots =
-                        currentPlayer.rentals[rowId] ??
-                        Array(slotCount).fill(0);
-                      const businesses = getBusinessesForRow(rowId);
-                      const canLoseInterest = hasRolledOnce && !lostInterest;
-                      const isLoseInterestSelected =
-                        selectedOption?.type === "lose_interest" &&
-                        selectedOption.rowId === rowId;
-                      return (
-                        <>
-                          <div className="score-sheet__row-head">
-                            <span className="score-sheet__row-label">
-                              {rowName}
-                            </span>
-                            {businesses[0] != null && (
-                              <span
-                                className={`score-sheet__row-business ${state.businessesClaimed[businesses[0].id] != null ? "score-sheet__row-business--claimed" : ""}`}
-                                style={
-                                  state.businessesClaimed[businesses[0].id] !=
-                                  null
-                                    ? ({
-                                        "--player-color": getPlayerColor(
-                                          state.players.findIndex(
-                                            (p) =>
-                                              p.playerId ===
-                                              state.businessesClaimed[
-                                                businesses[0].id
-                                              ],
-                                          ),
+                  {(() => {
+                    const lostInterest =
+                      currentPlayer.lostInterestRows.includes(rowId);
+                    const rowName = ROW_DISPLAY_NAMES[rowId] ?? rowId;
+                    const slotCount = getRentalSlotCount(rowId);
+                    const slots =
+                      currentPlayer.rentals[rowId] ?? Array(slotCount).fill(0);
+                    const businesses = getBusinessesForRow(rowId);
+                    const canLoseInterest = hasRolledOnce && !lostInterest;
+                    const isLoseInterestSelected =
+                      selectedOption?.type === "lose_interest" &&
+                      selectedOption.rowId === rowId;
+                    return (
+                      <>
+                        <div className="score-sheet__row-head">
+                          <span className="score-sheet__row-label">
+                            {rowName}
+                          </span>
+                          {businesses[0] != null && (
+                            <span
+                              className={`score-sheet__row-business ${state.businessesClaimed[businesses[0].id] != null ? "score-sheet__row-business--claimed" : ""}`}
+                              style={
+                                state.businessesClaimed[businesses[0].id] !=
+                                null
+                                  ? ({
+                                      "--player-color": getPlayerColor(
+                                        state.players.findIndex(
+                                          (p) =>
+                                            p.playerId ===
+                                            state.businessesClaimed[
+                                              businesses[0].id
+                                            ],
                                         ),
-                                      } as React.CSSProperties)
-                                    : undefined
-                                }
-                                title={
-                                  state.businessesClaimed[businesses[0].id] !=
-                                  null
-                                    ? `Claimed · $${businesses[0].income}`
-                                    : `$${businesses[0].income} (complete row to claim)`
-                                }
-                              >
-                                ${businesses[0].income}
-                                {state.businessesClaimed[businesses[0].id] !=
-                                  null && (
-                                  <span
-                                    className="score-sheet__row-business-check"
-                                    aria-label="Claimed"
-                                  >
-                                    {" "}
-                                    ✓
-                                  </span>
-                                )}
-                              </span>
-                            )}
-                            <button
-                              type="button"
-                              className={`score-sheet__lose-interest ${!canLoseInterest ? "score-sheet__lose-interest--placeholder" : ""} ${isLoseInterestSelected ? "score-sheet__lose-interest--selected" : ""}`}
-                              onClick={() =>
-                                canLoseInterest &&
-                                onSelectOption({ type: "lose_interest", rowId })
-                              }
-                              aria-label={
-                                canLoseInterest
-                                  ? `Lose interest in ${rowName}`
+                                      ),
+                                    } as React.CSSProperties)
                                   : undefined
                               }
-                              aria-hidden={!canLoseInterest}
-                              tabIndex={canLoseInterest ? undefined : -1}
-                              disabled={!canLoseInterest}
+                              title={
+                                state.businessesClaimed[businesses[0].id] !=
+                                null
+                                  ? `Claimed · $${businesses[0].income}`
+                                  : `$${businesses[0].income} (complete row to claim)`
+                              }
                             >
-                              <span className="score-sheet__lose-interest-text">
-                                Lose
-                              </span>
-                            </button>
-                          </div>
-                          <div className="score-sheet__row-strip">
-                            <div className="score-sheet__row-properties">
-                              {Array.from(
-                                { length: slotCount },
-                                (_, slotIndex) => {
-                                  const value = slots[slotIndex] ?? 0;
-                                  const pointValue =
-                                    ROW_RENTAL_VALUES[rowId]?.[slotIndex];
-                                  const isAvailable =
-                                    hasRolledOnce &&
-                                    claimableKey(rowId, slotIndex);
-                                  const writeValue = getRentalValueForRoll(
-                                    rowId,
-                                    diceValues,
-                                  );
-                                  const option: SelectedOption = {
-                                    type: "rental",
-                                    rowId,
-                                    slotIndex,
-                                  };
-                                  const isSelected = optionMatches(
-                                    selectedOption,
-                                    option,
-                                  );
-                                  const slotContent =
-                                    value > 0 ? (
-                                      <>
-                                        <span
-                                          className="score-sheet__rental-value"
-                                          aria-label={`Value ${value}`}
-                                        >
-                                          {value}
-                                        </span>
-                                        {pointValue != null && (
-                                          <span className="score-sheet__rental-point-value">
-                                            ${pointValue}
-                                          </span>
-                                        )}
-                                      </>
-                                    ) : isAvailable ? (
-                                      <>
-                                        <span className="score-sheet__rental-value">
-                                          {writeValue}
-                                        </span>
-                                        {pointValue != null && (
-                                          <span className="score-sheet__rental-point-value">
-                                            ${pointValue}
-                                          </span>
-                                        )}
-                                      </>
-                                    ) : (
-                                      <>
-                                        <span className="score-sheet__rental-empty">
-                                          —
-                                        </span>
-                                        {pointValue != null && (
-                                          <span className="score-sheet__rental-point-value">
-                                            ${pointValue}
-                                          </span>
-                                        )}
-                                      </>
-                                    );
-                                  const slotClassName = `score-sheet__rental-slot ${
-                                    value > 0
-                                      ? "score-sheet__rental-slot--filled"
-                                      : ""
-                                  } ${isAvailable ? "score-sheet__rental-slot--available" : ""} ${
-                                    isSelected
-                                      ? "score-sheet__rental-slot--selected"
-                                      : ""
-                                  }`;
-                                  if (isAvailable) {
-                                    return (
-                                      <button
-                                        key={slotIndex}
-                                        type="button"
-                                        className={slotClassName}
-                                        onClick={() => onSelectOption(option)}
-                                        aria-label={`Select rental, write ${writeValue}`}
+                              ${businesses[0].income}
+                              {state.businessesClaimed[businesses[0].id] !=
+                                null && (
+                                <span
+                                  className="score-sheet__row-business-check"
+                                  aria-label="Claimed"
+                                >
+                                  {" "}
+                                  ✓
+                                </span>
+                              )}
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            className={`score-sheet__lose-interest ${!canLoseInterest ? "score-sheet__lose-interest--placeholder" : ""} ${isLoseInterestSelected ? "score-sheet__lose-interest--selected" : ""}`}
+                            onClick={() =>
+                              canLoseInterest &&
+                              onSelectOption({ type: "lose_interest", rowId })
+                            }
+                            aria-label={
+                              canLoseInterest
+                                ? `Lose interest in ${rowName}`
+                                : undefined
+                            }
+                            aria-hidden={!canLoseInterest}
+                            tabIndex={canLoseInterest ? undefined : -1}
+                            disabled={!canLoseInterest}
+                          >
+                            <span className="score-sheet__lose-interest-text">
+                              Lose
+                            </span>
+                          </button>
+                        </div>
+                        <div className="score-sheet__row-strip">
+                          <div className="score-sheet__row-properties">
+                            {Array.from(
+                              { length: slotCount },
+                              (_, slotIndex) => {
+                                const value = slots[slotIndex] ?? 0;
+                                const pointValue =
+                                  ROW_RENTAL_VALUES[rowId]?.[slotIndex];
+                                const isAvailable =
+                                  hasRolledOnce &&
+                                  claimableKey(rowId, slotIndex);
+                                const writeValue = getRentalValueForRoll(
+                                  rowId,
+                                  diceValues,
+                                );
+                                const option: SelectedOption = {
+                                  type: "rental",
+                                  rowId,
+                                  slotIndex,
+                                };
+                                const isSelected = optionMatches(
+                                  selectedOption,
+                                  option,
+                                );
+                                const slotContent =
+                                  value > 0 ? (
+                                    <>
+                                      <span
+                                        className="score-sheet__rental-value"
+                                        aria-label={`Value ${value}`}
                                       >
-                                        {slotContent}
-                                      </button>
-                                    );
-                                  }
+                                        {value}
+                                      </span>
+                                      {pointValue != null && (
+                                        <span className="score-sheet__rental-point-value">
+                                          ${pointValue}
+                                        </span>
+                                      )}
+                                    </>
+                                  ) : isAvailable ? (
+                                    <>
+                                      <span className="score-sheet__rental-value">
+                                        {writeValue}
+                                      </span>
+                                      {pointValue != null && (
+                                        <span className="score-sheet__rental-point-value">
+                                          ${pointValue}
+                                        </span>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="score-sheet__rental-empty">
+                                        —
+                                      </span>
+                                      {pointValue != null && (
+                                        <span className="score-sheet__rental-point-value">
+                                          ${pointValue}
+                                        </span>
+                                      )}
+                                    </>
+                                  );
+                                const slotClassName = `score-sheet__rental-slot ${
+                                  value > 0
+                                    ? "score-sheet__rental-slot--filled"
+                                    : ""
+                                } ${isAvailable ? "score-sheet__rental-slot--available" : ""} ${
+                                  isSelected
+                                    ? "score-sheet__rental-slot--selected"
+                                    : ""
+                                }`;
+                                if (isAvailable) {
                                   return (
-                                    <div
+                                    <button
                                       key={slotIndex}
+                                      type="button"
                                       className={slotClassName}
+                                      onClick={() => onSelectOption(option)}
+                                      aria-label={`Select rental, write ${writeValue}`}
                                     >
                                       {slotContent}
-                                    </div>
+                                    </button>
                                   );
-                                },
-                              )}
-                            </div>
+                                }
+                                return (
+                                  <div
+                                    key={slotIndex}
+                                    className={slotClassName}
+                                  >
+                                    {slotContent}
+                                  </div>
+                                );
+                              },
+                            )}
                           </div>
-                        </>
-                      );
-                    })()}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
@@ -355,7 +354,9 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
                   }`}
                   style={
                     playerColor
-                      ? ({ "--player-color": playerColor } as React.CSSProperties)
+                      ? ({
+                          "--player-color": playerColor,
+                        } as React.CSSProperties)
                       : undefined
                   }
                 >
@@ -478,7 +479,9 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
             className="score-sheet__lotto"
             style={
               optionMatches(selectedOption, { type: "lotto" })
-                ? ({ "--player-color": getPlayerColor(state.currentPlayerIndex) } as React.CSSProperties)
+                ? ({
+                    "--player-color": getPlayerColor(state.currentPlayerIndex),
+                  } as React.CSSProperties)
                 : undefined
             }
           >
@@ -486,16 +489,22 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
             <button
               type="button"
               className={`score-sheet__claim-btn ${
-                currentPlayer.lottoClaimed ? "score-sheet__claim-btn--claimed" : ""
+                currentPlayer.lottoClaimed
+                  ? "score-sheet__claim-btn--claimed"
+                  : ""
               } ${
                 hasRolledOnce && availableLotto
                   ? "score-sheet__claim-btn--available"
                   : ""
               } ${optionMatches(selectedOption, { type: "lotto" }) ? "score-sheet__claim-btn--selected" : ""}`}
               onClick={() =>
-                hasRolledOnce && availableLotto && onSelectOption({ type: "lotto" })
+                hasRolledOnce &&
+                availableLotto &&
+                onSelectOption({ type: "lotto" })
               }
-              disabled={currentPlayer.lottoClaimed || !hasRolledOnce || !availableLotto}
+              disabled={
+                currentPlayer.lottoClaimed || !hasRolledOnce || !availableLotto
+              }
               aria-label={
                 currentPlayer.lottoClaimed
                   ? "Pick 5 Lotto claimed"
