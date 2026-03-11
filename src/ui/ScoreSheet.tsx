@@ -43,6 +43,7 @@ interface ScoreSheetProps {
   onRollDice: () => void;
   onPlay: () => void;
   onToggleLock: (dieId: string) => void;
+  isDiceRolling?: boolean;
 }
 
 export const PLAYER_COLORS = ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b"];
@@ -58,9 +59,12 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
   onRollDice,
   onPlay,
   onToggleLock,
+  isDiceRolling = false,
 }) => {
   const currentPlayer = state.players[state.currentPlayerIndex]!;
-  const hasRolledOnce = state.hasRolledThisTurn ?? false;
+  /* Options stay hidden until dice animation completes */
+  const hasRolledOnce =
+    (state.hasRolledThisTurn ?? false) && !isDiceRolling;
   const diceValues = getDiceValues(state.dice);
   const claimableSlots = getClaimableRentalSlots(currentPlayer, diceValues);
   const claimableKey = (rowId: string, slotIndex: number) =>
@@ -527,6 +531,7 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
               dice={state.dice}
               phase={state.phase}
               showValues={state.hasRolledThisTurn ?? false}
+              isDiceRolling={isDiceRolling}
               onToggleLock={onToggleLock}
             />
             <ActionBar

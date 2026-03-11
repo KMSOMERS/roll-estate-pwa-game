@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useCallback } from "react";
+import React, { useReducer, useState, useCallback, useRef, useEffect } from "react";
 import { gameReducer } from "../game/gameReducer";
 import { createInitialState } from "../game/initialState";
 import type { PlayerConfig, SelectedOption } from "../game/types";
@@ -35,10 +35,28 @@ export const GameScreen: React.FC<GameScreenProps> = ({
   const [selectedOption, setSelectedOption] = useState<SelectedOption | null>(
     null,
   );
+  const [isDiceRolling, setIsDiceRolling] = useState(false);
+  const rollAnimationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (rollAnimationTimeoutRef.current != null) {
+        clearTimeout(rollAnimationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleRollDice = useCallback(() => {
     setSelectedOption(null);
+    setIsDiceRolling(true);
     dispatch({ type: "ROLL_DICE" });
+    if (rollAnimationTimeoutRef.current != null) {
+      clearTimeout(rollAnimationTimeoutRef.current);
+    }
+    rollAnimationTimeoutRef.current = setTimeout(() => {
+      rollAnimationTimeoutRef.current = null;
+      setIsDiceRolling(false);
+    }, 600);
   }, []);
 
   const handlePlay = useCallback(() => {
@@ -97,6 +115,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({
         onRollDice={handleRollDice}
         onPlay={handlePlay}
         onToggleLock={(dieId) => dispatch({ type: "TOGGLE_DIE_LOCK", dieId })}
+        isDiceRolling={isDiceRolling}
       />
 
       {state.isEnded && state.finalScores && (
