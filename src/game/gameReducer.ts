@@ -14,9 +14,11 @@ import {
   getClaimableRouteIds,
   hasRunOf5,
   hasFiveMatching,
+  currentPlayerHasNoClaimOptions,
 } from "./rules";
 import { getRentalSlotCount } from "./board";
 import { computeFinalScores } from "./scoring";
+import { createInitialState } from "./initialState";
 
 function getCurrentPlayer(state: GameState) {
   return state.players[state.currentPlayerIndex]!;
@@ -31,7 +33,7 @@ function immutableUpdatePlayer(
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
-  if (state.isEnded) return state;
+  if (state.isEnded && action.type !== "RESET_GAME") return state;
 
   switch (action.type) {
     case "ROLL_DICE": {
@@ -53,6 +55,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case "CONFIRM_ROLL_DONE": {
       if (state.phase !== "rolling") return state;
+      if (currentPlayerHasNoClaimOptions(state)) {
+        const finalScores = computeFinalScores(state.players);
+        return { ...state, phase: "buying", isEnded: true, finalScores };
+      }
       return { ...state, phase: "buying" };
     }
 
@@ -196,6 +202,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         hasRolledThisTurn: false,
         phase: "rolling",
       };
+    }
+
+    case "RESET_GAME": {
+      return createInitialState(action.playerConfigs);
     }
 
     default:

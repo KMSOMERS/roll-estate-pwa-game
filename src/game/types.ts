@@ -69,7 +69,8 @@ export type GameAction =
   | { type: "CLAIM_LOTTO" }
   | { type: "LOSE_INTEREST"; rowId: string }
   | { type: "END_TURN" }
-  | { type: "RESET_TURN" };
+  | { type: "RESET_TURN" }
+  | { type: "RESET_GAME"; playerConfigs: PlayerConfig[] };
 
 /** Player config for setup (name only; id generated). */
 export interface PlayerConfig {

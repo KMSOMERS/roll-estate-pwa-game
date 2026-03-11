@@ -4,6 +4,7 @@ import { createInitialState } from "../game/initialState";
 import type { PlayerConfig, SelectedOption } from "../game/types";
 import { ScoreSheet } from "./ScoreSheet";
 import { PlayerSwitcher } from "./PlayerSwitcher";
+import { EndScreen } from "./EndScreen";
 
 interface GameScreenProps {
   playerConfigs: PlayerConfig[];
@@ -69,6 +70,11 @@ export const GameScreen: React.FC<GameScreenProps> = ({
     setSelectedOption((prev) => (optionMatches(prev, option) ? null : option));
   }, []);
 
+  const handlePlayAgain = useCallback(() => {
+    setSelectedOption(null);
+    dispatch({ type: "RESET_GAME", playerConfigs });
+  }, [playerConfigs]);
+
   return (
     <div className="game-screen">
       <PlayerSwitcher
@@ -89,31 +95,12 @@ export const GameScreen: React.FC<GameScreenProps> = ({
       />
 
       {state.isEnded && state.finalScores && (
-        <section className="game-screen__summary card" aria-label="Game over">
-          <h2 className="game-screen__summary-title">Game over</h2>
-          <p className="game-screen__summary-desc">
-            Most money wins. Ties: most rentals, then mass transit routes, then stock portfolio value.
-          </p>
-          <ol className="game-screen__summary-list">
-            {state.finalScores.map((score) => (
-              <li key={score.playerId} className="game-screen__summary-item">
-                <span className="game-screen__summary-rank">#{score.rank}</span>
-                <span className="game-screen__summary-name">{score.name}</span>
-                <span className="game-screen__summary-total">${score.total}</span>
-                <span className="game-screen__summary-tiebreakers">
-                  Rentals: {score.rentalsCount} · Routes: {score.massTransitCount} · Stock: ${score.stockValue}
-                </span>
-              </li>
-            ))}
-          </ol>
-          <button
-            type="button"
-            className="game-screen__summary-again button-primary"
-            onClick={onBackToSetup}
-          >
-            Play again
-          </button>
-        </section>
+        <EndScreen
+          finalScores={state.finalScores}
+          players={state.players}
+          onPlayAgain={handlePlayAgain}
+          onBackToSetup={onBackToSetup}
+        />
       )}
     </div>
   );

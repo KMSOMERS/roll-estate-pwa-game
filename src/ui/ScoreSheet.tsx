@@ -45,9 +45,9 @@ interface ScoreSheetProps {
   onToggleLock: (dieId: string) => void;
 }
 
-const PLAYER_COLORS = ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b"];
+export const PLAYER_COLORS = ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b"];
 
-function getPlayerColor(playerIndex: number): string {
+export function getPlayerColor(playerIndex: number): string {
   return PLAYER_COLORS[playerIndex % PLAYER_COLORS.length] ?? "#64748b";
 }
 
@@ -133,17 +133,11 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
             ["row7", "row8"],
           ].map((pair, pairIndex) => (
             <div key={pairIndex} className="score-sheet__row-combined">
-              {pair.map((rowId, idx) => (
-                <React.Fragment key={rowId}>
-                  {idx === 1 && (
-                    <div
-                      className="score-sheet__row-divider"
-                      aria-hidden="true"
-                    />
-                  )}
-                  <div
-                    className={`score-sheet__neighborhood ${currentPlayer.lostInterestRows.includes(rowId) ? "score-sheet__row--lost" : ""}`}
-                  >
+              {pair.map((rowId) => (
+                <div
+                  key={rowId}
+                  className={`score-sheet__neighborhood ${currentPlayer.lostInterestRows.includes(rowId) ? "score-sheet__row--lost" : ""}`}
+                >
                     {(() => {
                       const lostInterest =
                         currentPlayer.lostInterestRows.includes(rowId);
@@ -322,8 +316,7 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
                         </>
                       );
                     })()}
-                  </div>
-                </React.Fragment>
+                </div>
               ))}
             </div>
           ))}
@@ -349,12 +342,8 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
                 claimedBy != null
                   ? state.players.findIndex((p) => p.playerId === claimedBy)
                   : -1;
-              const color =
-                playerIndex >= 0
-                  ? getPlayerColor(playerIndex)
-                  : isSelected
-                    ? getPlayerColor(state.currentPlayerIndex)
-                    : undefined;
+              const playerColor =
+                playerIndex >= 0 ? getPlayerColor(playerIndex) : undefined;
               const name = MASS_TRANSIT_ROUTE_NAMES[routeId] ?? routeId;
               return (
                 <div
@@ -365,8 +354,8 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
                     isSelected ? "score-sheet__route--selected" : ""
                   }`}
                   style={
-                    color
-                      ? ({ "--player-color": color } as React.CSSProperties)
+                    playerColor
+                      ? ({ "--player-color": playerColor } as React.CSSProperties)
                       : undefined
                   }
                 >
@@ -434,17 +423,17 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
                 }
                 aria-label={
                   currentPlayer.liquidAssets > 0
-                    ? `Liquid assets: ${currentPlayer.liquidAssets}`
+                    ? `Liquid Chance: ${currentPlayer.liquidAssets}`
                     : hasRolledOnce && availableLiquid
-                      ? `Select Liquid Assets (sum ${liquidSum})`
-                      : "Liquid (roll dice to claim)"
+                      ? `Select Liquid Chance (sum ${liquidSum})`
+                      : "Liquid Chance (roll dice to claim)"
                 }
               >
                 {currentPlayer.liquidAssets > 0
-                  ? `Liquid: ${currentPlayer.liquidAssets}`
+                  ? `Liquid Chance: ${currentPlayer.liquidAssets}`
                   : hasRolledOnce && availableLiquid
                     ? liquidSum
-                    : "Liquid"}
+                    : "Liquid Chance"}
               </button>
               <div className="score-sheet__stock-indexes">
                 {[0, 1].map((i) =>
@@ -485,24 +474,38 @@ export const ScoreSheet: React.FC<ScoreSheetProps> = ({
               </div>
             </div>
           </div>
-          <div className="score-sheet__lotto">
+          <div
+            className="score-sheet__lotto"
+            style={
+              optionMatches(selectedOption, { type: "lotto" })
+                ? ({ "--player-color": getPlayerColor(state.currentPlayerIndex) } as React.CSSProperties)
+                : undefined
+            }
+          >
             <span className="score-sheet__invest-label">Pick 5 Lotto</span>
-            {currentPlayer.lottoClaimed ? (
-              <span className="score-sheet__lotto-claimed">Claimed $150</span>
-            ) : hasRolledOnce && availableLotto ? (
-              <button
-                type="button"
-                className={`score-sheet__claim-btn ${optionMatches(selectedOption, { type: "lotto" }) ? "score-sheet__claim-btn--selected" : ""}`}
-                onClick={() => onSelectOption({ type: "lotto" })}
-                aria-label="Select Pick 5 Lotto $150"
-              >
-                Claim $150
-              </button>
-            ) : (
-              <span className="score-sheet__lotto-empty">
-                5 matching → $150
-              </span>
-            )}
+            <button
+              type="button"
+              className={`score-sheet__claim-btn ${
+                currentPlayer.lottoClaimed ? "score-sheet__claim-btn--claimed" : ""
+              } ${
+                hasRolledOnce && availableLotto
+                  ? "score-sheet__claim-btn--available"
+                  : ""
+              } ${optionMatches(selectedOption, { type: "lotto" }) ? "score-sheet__claim-btn--selected" : ""}`}
+              onClick={() =>
+                hasRolledOnce && availableLotto && onSelectOption({ type: "lotto" })
+              }
+              disabled={currentPlayer.lottoClaimed || !hasRolledOnce || !availableLotto}
+              aria-label={
+                currentPlayer.lottoClaimed
+                  ? "Pick 5 Lotto claimed"
+                  : hasRolledOnce && availableLotto
+                    ? "Select Pick 5 Lotto $150"
+                    : "Pick 5 Lotto — 5 matching dice to claim $150"
+              }
+            >
+              {currentPlayer.lottoClaimed ? "Claimed $150" : "Claim $150"}
+            </button>
           </div>
         </div>
 

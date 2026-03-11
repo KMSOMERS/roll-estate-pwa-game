@@ -202,8 +202,8 @@ describe('rules', () => {
   });
 
   describe('checkEndgameTriggered', () => {
-    it('returns true when a player has 4 businesses (2-player)', () => {
-      const claimed = { 'row1-b': 'P1', 'row2-b': 'P1', 'row3-b': 'P1', 'row4-b': 'P1' };
+    it('returns true when a player has 3 businesses (2-player)', () => {
+      const claimed = { 'row1-b': 'P1', 'row2-b': 'P1', 'row3-b': 'P1' };
       const players: PlayerSheet[] = [
         { playerId: 'P1', name: 'P1', rentals: emptyRentals(), purchasedAssets: [], lostInterestRows: [], rentalsCount: 0, massTransitCount: 0, liquidAssets: 0, indexesClaimed: 0, stockValue: 0, lottoClaimed: false },
       ];

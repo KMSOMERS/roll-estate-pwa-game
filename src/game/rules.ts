@@ -2,7 +2,7 @@
  * Game rules: rental claiming (die-face and triple/quad), business completion, endgame.
  */
 
-import type { Die, PlayerSheet, RentalsByRow } from "./types";
+import type { Die, GameState, PlayerSheet, RentalsByRow } from "./types";
 import type { DieValue } from "./types";
 import {
   ROW_IDS,
@@ -166,8 +166,8 @@ export function countRemainingRentalsForPlayer(player: PlayerSheet): number {
   return count;
 }
 
-/** 2-player variant: game ends when a player opens their 4th business. */
-export const BUSINESSES_TO_END_GAME_2P = 4;
+/** 2-player variant: game ends when a player claims their 3rd business. */
+export const BUSINESSES_TO_END_GAME_2P = 3;
 
 export function checkEndgameTriggered(
   players: PlayerSheet[],
@@ -252,4 +252,23 @@ export function hasFiveMatching(diceValues: DieValue[]): boolean {
   if (diceValues.length !== 5) return false;
   const v = diceValues[0];
   return diceValues.every((d) => d === v);
+}
+
+/**
+ * True when the current player has no valid claim in the buying phase
+ * (no rental, route, liquid, index, lotto, or lose-interest option).
+ * Used to end the game when a player cannot select any option.
+ */
+export function currentPlayerHasNoClaimOptions(state: GameState): boolean {
+  const player = state.players[state.currentPlayerIndex];
+  if (!player) return true;
+  const diceValues = getDiceValues(state.dice);
+  if (getClaimableRentalSlots(player, diceValues).length > 0) return false;
+  if (getClaimableRouteIds(state.dice, state.routesClaimed, player.playerId).length > 0)
+    return false;
+  if (player.liquidAssets === 0) return false; // can always claim liquid (even 0)
+  if (hasRunOf5(diceValues) && player.indexesClaimed < 2) return false;
+  if (hasFiveMatching(diceValues) && !player.lottoClaimed) return false;
+  if (player.lostInterestRows.length < ROW_IDS.length) return false; // can lose interest on at least one row
+  return true;
 }
